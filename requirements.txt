@@ -1,5 +1,17 @@
-face-recognition
-raw_data
+# Jupyter packages
 jupyter
 ipykernel
 notebook
+
+# Data science and machine learning packages
+numpy
+matplotlib
+pillow
+face_recognition
+
+# Optional: Deep learning libraries
+# tensorflow
+# torch
+
+# Additional packages for handling raw data (if applicable)
+# raw_data/
