@@ -1,2 +1,5 @@
 face-recognition
 raw_data
+jupyter
+ipykernel
+notebook
