@@ -1,2 +1,9 @@
-face-recognition
-raw_data
+#######raw_data/
+
+
+#Packages to install
+pillow
+matplotlib
+numpy
+face_recognition
+jupyter
