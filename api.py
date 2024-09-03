@@ -1,8 +1,4 @@
 from fastapi import FastAPI
-
-app = FastAPI()
-
-
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import StreamingResponse
 from PIL import Image
