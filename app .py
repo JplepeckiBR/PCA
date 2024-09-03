@@ -65,7 +65,7 @@ plt.imshow(skin)
 plt.show()
 hair = np.dstack((R*(np.array(foreground)==13),G*(np.array(foreground)==13) ,B*(np.array(foreground)==13)))
 plt.imshow(hair)
-
+plt.show()
 
 #######---------------------------------------------------#######
 #######--------------------HEX VALUES---------------------#######
