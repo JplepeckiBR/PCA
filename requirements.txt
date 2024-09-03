@@ -2,10 +2,5 @@
 pillow
 matplotlib
 numpy
-face_recognition
 jupyter
-
-
-###### MODEL TRAINING #######
-scikit-learn
-tensorflow
+fastapi
