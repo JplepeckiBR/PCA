@@ -4,4 +4,4 @@ matplotlib
 numpy
 jupyter
 fastapi
-
+uvicorn

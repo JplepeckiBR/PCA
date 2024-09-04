@@ -4,6 +4,9 @@ from PIL import Image
 from io import BytesIO
 import requests
 import json
+import torch
+from torch import nn
+from transformers import SegformerImageProcessor, SegformerForSemanticSegmentation
 
 
 # Set custom CSS for font style, centering, and text box styling
@@ -170,27 +173,128 @@ if picture:
 
 
 
-def flip_image(img_buffer):
-    fastapi_url = "http://localhost:8000/flip-image/"
-    files = {"file": ("filename.png", img_buffer, "image/png")}
-    # files = {'image': open(file_path, 'rb')}
-    response = requests.post(fastapi_url, files=files)
+    def flip_image(img_buffer):
+        fastapi_url = "http://localhost:8000/flip-image/"
+        files = {"file": ("filename.png", img_buffer, "image/png")}
+        # files = {'image': open(file_path, 'rb')}
+        response = requests.post(fastapi_url, files=files)
 
-    if response.status_code == 200:
-        flipped_img_data = response.content
-        flipped_img = Image.open(BytesIO(flipped_img_data))
+        if response.status_code == 200:
+            flipped_img_data = response.content
+            flipped_img = Image.open(BytesIO(flipped_img_data))
 
-        return flipped_img_data
+            return flipped_img_data
 
-# prep the image to send to the FastAPI
-if st.button('Flip Image'):
-    img_buffer = BytesIO()
-    image.save(img_buffer, format="PNG")
-    img_buffer.seek(0)
+    # prep the image to send to the FastAPI
+    if st.button('Flip Image'):
+        img_buffer = BytesIO()
+        image.save(img_buffer, format="PNG")
+        img_buffer.seek(0)
 
-    flipped_img = flip_image(img_buffer)
+        flipped_img = flip_image(img_buffer)
 
-    if flipped_img:
-        st.image(flipped_img, caption="Flipped Image.", use_column_width=True)
-    else:
-        st.error("An error occurred while processing the image.")
+        # if flipped_img:
+        #     st.image(flipped_img, caption="Flipped Image.", use_column_width=True)
+        # else:
+        #     st.error("An error occurred while processing the image.")
+
+        # # img_buffer2 = BytesIO()
+        # # flipped_img.save(img_buffer2, format="PNG")
+        # # img_buffer2.seek(0)
+
+        # fastapi_url2 = "http://localhost:8000/predict/"
+        # files2 = {"file": ("filename.png", flipped_img, "image/png")}
+        # # files = {'image': open(file_path, 'rb')}
+        # response = requests.post(fastapi_url2, files=files2)
+
+        # response_json = response.json()
+
+        # if 'labels' in response_json:
+        #     response_img = eval(response_json['labels'])
+        #     st.image(np.array(response_img))
+        # else:
+        #     st.error(f"Error: 'labels' not found in the response. Full response: {response_json}")
+
+
+        # # st.write(response.json()['labels'])
+
+
+
+
+
+
+
+
+
+# Define the predict function
+def predict(image):
+    device = (
+        "cuda"
+        if torch.cuda.is_available()
+        else "mps"
+        if torch.backends.mps.is_available()
+        else "cpu"
+    )
+
+    # Load models
+    image_processor = SegformerImageProcessor.from_pretrained("jonathandinu/face-parsing")
+    model = SegformerForSemanticSegmentation.from_pretrained("jonathandinu/face-parsing")
+    model.to(device)
+
+    # Run inference on image
+    inputs = image_processor(images=image, return_tensors="pt").to(device)
+    outputs = model(**inputs)
+    logits = outputs.logits
+
+    # Resize output to match input image dimensions
+    upsampled_logits = nn.functional.interpolate(logits,
+                size=image.size[::-1], # H x W
+                mode='bilinear',
+                align_corners=False)
+
+    # Get label masks
+    labels = upsampled_logits.argmax(dim=1)[0]
+
+    # Move to CPU to visualize in matplotlib
+    labels_viz = labels.cpu().numpy()
+
+    return labels_viz
+
+# Function to decode image data URL
+def data_url_to_image(data_url):
+    header, encoded = data_url.split(",", 1)
+    data = base64.b64decode(encoded)
+    image = Image.open(BytesIO(data))
+    return image
+
+
+
+
+
+
+
+
+
+# Face parsing
+def main():
+    st.title("Face Parsing with Segformer")
+
+    # Image upload
+    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+
+    if uploaded_file is not None:
+        # Load image
+        image = Image.open(uploaded_file)
+
+        # Display the original image
+        st.image(image, caption='Uploaded Image', use_column_width=True)
+
+        # Run the prediction
+        st.write("Running inference...")
+        labels_viz = predict(image)
+
+        # Display the segmentation mask (optional: apply a color map)
+        st.image(labels_viz, caption='Segmentation Mask', use_column_width=True)
+
+if __name__ == "__main__":
+    main()

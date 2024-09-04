@@ -5,8 +5,6 @@ from PIL import Image
 import io
 from image_processing import predict
 
-predict()
-
 
 app = FastAPI()
 @app.get("/")
@@ -26,10 +24,15 @@ async def flip_image(file: UploadFile = File(...)):
 #Type Annotation (file: UploadFile):Tells FastAPI that this parameter should be treated as an uploaded file.
 #Enables the use of UploadFile methods and attributes, such as file.file, file.filename, file.content_type, etc.
 
-@app.post("/predict")
-def prediction(img):
+@app.post("/get_masks")
+def prediction(file: UploadFile = File(...)):
 # todo sort out what the file type is being received here
-
-    labels = predict(image_io)
-    return labels
-# TODO check the data type of returning the prediction
+    img = Image.open(file.file)
+    img_io = io.BytesIO()
+    labels = predict(img)
+    print(labels)
+    # TODO check the data type of returning the prediction
+    if labels is not None:
+            return {"labels": str(labels.tolist()), "label_type": str(type(labels))}
+    else:
+            return {"error": "Prediction returned None", "label_type": None}

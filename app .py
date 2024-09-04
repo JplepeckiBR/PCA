@@ -182,9 +182,11 @@ visualize_color(average_brows_color, "brows")
 visualize_color(average_hair_color, "hair")
 visualize_color(average_eye_color, "eyes")
 visualize_color(average_lip_color, "lips")
+
 #######---------------------------------------------------#######
 #######------------------Dataset for skin tones-----------#######
 #######---------------------------------------------------#######
+
 # Dataset for a multitude of skin tones labelled Warm, Neutral, Cool
 data = [
     (245, 225, 205, 'Warm'),
