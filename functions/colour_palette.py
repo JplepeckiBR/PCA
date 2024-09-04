@@ -58,6 +58,10 @@ def extract_average_colors(image_path):
 
     # Move to CPU for further processing
     labels_viz = labels.cpu().numpy()
+    plt.imshow(labels_viz)
+    plt.show()
+
+    plt.imshow(image)
 
     # Extract RGB channels
     R = np.array(image)[:, :, 0]
@@ -125,7 +129,7 @@ def extract_average_colors(image_path):
     return average_skin_color, average_brows_color, average_hair_color, average_lip_color, average_eye_color
 
 # Example usage:
-image_path = "raw_data/images of people i know/Amier7.jpg"
+image_path = "raw_data/images of people i know/test2.jpg"
 average_skin_color, average_brows_color, average_hair_color, average_lip_color, average_eye_color = extract_average_colors(image_path)
 
 
